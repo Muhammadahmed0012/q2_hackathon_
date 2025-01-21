@@ -73,7 +73,7 @@ export default function ProductsData({ params }: { params: { id: string } }) {
               {/* Color Selection */}
               <div className="flex flex-wrap gap-4">
                 <span className="text-lg font-medium">Choose Color:</span>
-                {["W", "G", "Y", "B", "P"].map((color) => (
+                {["W", "G", "Y", "B", "P", "t"].map((color) => (
                   <label key={color} className="flex items-center space-x-2">
                     <input
                       type="radio"

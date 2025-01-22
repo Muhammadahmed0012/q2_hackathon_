@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import { useCart } from "@/context/cartContext";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-
+import { useParams } from "next/navigation";
 interface Product {
   mRP: string;
   _id: string;
@@ -21,10 +21,10 @@ interface Product {
   category: string;
 }
 
-export default function ProductsData({ params }: { params: { id: string } }) {
+export default  function ProductsData() {
   const [products, setProducts] = useState<Product[]>([]);
-  const { addToCart } = useCart(); // Access addToCart function
-  const { id } = params;
+  const { addToCart } = useCart();
+  const { id } =  useParams();
 
   useEffect(() => {
     const fetchProducts = async () => {

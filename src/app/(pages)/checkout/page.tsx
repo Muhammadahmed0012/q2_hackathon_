@@ -12,6 +12,26 @@ const CheckoutPage = () => {
     paymentMethod: "card",
   });
   const [loading, setLoading] = useState(false);
+  interface OrderDetails {
+    orderId: string;
+    customer: {
+      name: string;
+      email: string;
+      address: string;
+    };
+    items: {
+      product: {
+        _id: string;
+        name: string;
+        price: number;
+        image: string;
+      };
+      quantity: number;
+    }[];
+    totalAmount: number;
+  }
+
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -26,10 +46,23 @@ const CheckoutPage = () => {
 
     try {
       setLoading(true);
-      // Simulate checkout process or API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Simulate order processing and shipping API call
+      const mockOrderID = `ORD-${Math.floor(Math.random() * 1000000)}`;
+      const orderData = {
+        orderId: mockOrderID,
+        customer: { ...formData },
+        items: cart,
+        totalAmount: cart.reduce(
+          (total, item) => total + item.product.price * item.quantity,
+          0
+        ),
+      };
+
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulated delay
+
+      setOrderDetails(orderData);
       alert("Order placed successfully!");
-      // Redirect or clear cart logic here
     } catch (error) {
       console.error("Checkout failed:", error);
       alert("Failed to complete the order. Please try again.");
@@ -120,7 +153,14 @@ const CheckoutPage = () => {
             <div className="space-y-4">
               {cart.map((item) => (
                 <div key={item.product._id} className="flex items-center justify-between">
-                  <p className="text-gray-700 font-medium">{item.product.name}</p>
+                  <div className="flex items-center">
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      className="w-16 h-16 object-cover rounded-md mr-4"
+                    />
+                    <p className="text-gray-700 font-medium">{item.product.name}</p>
+                  </div>
                   <p className="text-gray-700 font-medium">
                     ₹ {item.product.price * item.quantity}
                   </p>
@@ -142,6 +182,43 @@ const CheckoutPage = () => {
             </button>
           </div>
         </div>
+
+     {/* Order Confirmation Details */}
+{/* Order Confirmation Details */}
+{orderDetails && (
+  <div className="mt-12 bg-white rounded-lg p-6 shadow-sm">
+    <h2 className="text-2xl font-semibold mb-6">Order Confirmation</h2>
+    <p className="mb-4 text-gray-700">Thank you for your order!</p>
+    <p className="mb-4 text-gray-700">
+      Order ID: <strong>{orderDetails.orderId}</strong>
+    </p>
+    <p className="mb-4 text-gray-700">Name: {orderDetails.customer.name}</p>
+    <p className="mb-4 text-gray-700">Email: {orderDetails.customer.email}</p>
+    <p className="mb-4 text-gray-700">Shipping Address: {orderDetails.customer.address}</p>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold mb-4">Ordered Products:</h3>
+      {orderDetails.items.map((item) => (
+        <div key={item.product._id} className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center">
+            <img
+              src={item.product.image}
+              alt={item.product.name}
+              className="w-16 h-16 object-cover rounded-md mr-4"
+            />
+            <p className="text-gray-700 font-medium">{item.product.name}</p>
+          </div>
+          <p className="text-gray-700 font-medium">₹ {item.product.price * item.quantity}</p>
+        </div>
+      ))}
+      <div className="flex justify-between font-semibold text-lg border-t pt-4">
+        <p>Total</p>
+        <p>₹ {orderDetails.totalAmount}</p>
+      </div>
+    </div>
+  </div>
+)}
+
+
       </div>
     </div>
   );

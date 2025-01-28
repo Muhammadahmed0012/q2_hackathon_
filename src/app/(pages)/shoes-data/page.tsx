@@ -5,7 +5,7 @@ import Link from "next/link";
 import React from "react";
 
 interface Shoe {
-  productname: string; // Name of the shoe product
+  product_name: string; // Name of the shoe product
   price: number; // Price of the product in INR
   _rev: string; // Revision ID (auto-generated)
   _type: string; // Document type (e.g., 'shoes')
@@ -27,6 +27,7 @@ export default async function Shoes_data() {
             <div className="group relative bg-white shadow-md rounded-lg p-4">
               {/* Product Image */}
               <div className="relative overflow-hidden rounded-lg">
+                <div className="h-full w-full">
                 <Image
                   src={urlFor(data.image).url()}
                   alt="Product Image"
@@ -34,6 +35,7 @@ export default async function Shoes_data() {
                   width={420}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
+                </div>
                 {/* Hover Actions */}
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   {/* Wishlist Icon */}
@@ -63,7 +65,7 @@ export default async function Shoes_data() {
               {/* Product Info */}
               <div className="mt-4 text-center">
                 <div className="flex justify-between items-center space-x-10">
-                  <h2 className="text-lg font-semibold">{data.productname}</h2>
+                  <h2 className="text-lg font-semibold">{data.product_name}</h2>
                   <span className="text-lg font-medium">₹{data.price}</span>
                 </div>
                 <span className="text-sm text-gray-500">{data.category}</span>

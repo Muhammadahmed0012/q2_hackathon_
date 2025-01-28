@@ -6,6 +6,8 @@ import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { toast } from "react-hot-toast";
+
 interface Product {
   mRP: string;
   _id: string;
@@ -14,18 +16,20 @@ interface Product {
   color: string;
   description: string;
   justIn: string;
-  productName: string;
+  product_name: string; // Ensure product_name is used consistently here
   image: string;
   price: number;
   addToCart: string;
   category: string;
 }
 
-export default  function ProductsData() {
+export default function ProductsData() {
   const [products, setProducts] = useState<Product[]>([]);
   const { addToCart } = useCart();
-  const { id } =  useParams();
+  const { id } = useParams();
+  const [, setWishlist] = useState<Product[]>([]);
 
+  // Fetch products based on the category id
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -43,6 +47,36 @@ export default  function ProductsData() {
       fetchProducts();
     }
   }, [id]);
+
+  // Load wishlist from localStorage
+  useEffect(() => {
+    const savedWishlist = localStorage.getItem("wishlist");
+    if (savedWishlist) {
+      setWishlist(JSON.parse(savedWishlist));
+    }
+  }, []);
+
+  // Add product to cart
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    toast.success(`${product.product_name} has been added to the cart!`);
+  };
+
+  // Add product to wishlist and update localStorage
+  const handleAddToWishlist = (product: Product) => {
+    console.log("Adding to wishlist: ", product); // Log the product object
+    setWishlist((prevWishlist) => {
+      if (!prevWishlist.some((item) => item._id === product._id)) {
+        const updatedWishlist = [...prevWishlist, product];
+        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist)); // Save to localStorage
+        toast.success(`${product.product_name} has been added to the wishlist!`);
+        return updatedWishlist;
+      } else {
+        toast.error(`${product.product_name} is already in your wishlist!`);
+        return prevWishlist;
+      }
+    });
+  };
 
   return (
     <div>
@@ -64,38 +98,32 @@ export default  function ProductsData() {
             {/* Product Content */}
             <div className="flex flex-col space-y-6 lg:w-[35rem] text-center lg:text-left">
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold">
-                {data.productName}
+                {data.product_name}
               </h2>
               <p className="text-sm sm:text-base lg:text-lg font-light opacity-80">
                 {data.description}
               </p>
 
-              {/* Color Selection */}
-              <div className="flex flex-wrap gap-4">
-                <span className="text-lg font-medium">Choose Color:</span>
-                {["W", "G", "Y", "B", "P", "t"].map((color) => (
-                  <label key={color} className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="color"
-                      value={color}
-                      className="h-5 w-5 border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium">{color}</span>
-                  </label>
-                ))}
-              </div>
-
+              {/* Price Section */}
               <div className="flex items-center">
                 <span className="text-xl font-medium">{data.mRP}</span>
                 <span className="text-2xl font-medium">{data.price}</span>
               </div>
 
+              {/* Add to Cart Button */}
               <button
-                onClick={() => addToCart(data)}
+                onClick={() => handleAddToCart(data)}
                 className="h-12 sm:h-14 w-40 sm:w-48 bg-black text-white text-sm sm:text-lg font-medium rounded-lg hover:bg-gray-800"
               >
                 {data.addToCart}
+              </button>
+
+              {/* Add to Wishlist Button */}
+              <button
+                onClick={() => handleAddToWishlist(data)}
+                className="h-12 sm:h-14 w-40 sm:w-48 bg-gray-200 text-black text-sm sm:text-lg font-medium rounded-lg hover:bg-gray-400 mt-4"
+              >
+                Add to Wishlist
               </button>
             </div>
           </div>

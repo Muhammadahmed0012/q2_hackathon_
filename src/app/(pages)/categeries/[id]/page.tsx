@@ -1,12 +1,16 @@
+'use client'
+import { useCart } from "@/context/cartContext";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
-import React from "react";
+import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast"; // Import react-hot-toast
 
 interface Categorydata {
   _createdAt: string; // Creation timestamp
   _updatedAt: string; // Last updated timestamp
-  product_name: string; // Name of the product/category
+  name: string; // Name of the product/category
   _id: string; // Unique identifier for the document
   category: string; // Product category
   image: string; // Image object
@@ -15,25 +19,58 @@ interface Categorydata {
   _rev: string; // Revision ID
   _type: string; // Type of the document (e.g., 'categories')
   description: string; // Description of the product/category
+  product_name: string; // Product name
 }
 
-export default async function Category_page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  //    console.log(id);
+export default function Category_page() {
+  const [products, setProducts] = useState<Categorydata[]>([]);
+  const { addToCart } = useCart();
+  const [, setWishlist] = useState<Categorydata[]>([]); // Wishlist state
+  const { id } = useParams();
 
-  const res: Categorydata[] = await client.fetch(
-    `*[_type=='catgeries' && _id==$id]`,
-    { id: id }
-  );
-  console.log(res);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data: Categorydata[] = await client.fetch(
+          `*[_type == 'catgeries' && _id == $id]`,
+          { id }
+        );
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
+    };
 
+    if (id) {
+      fetchProducts();
+    }
+  }, [id]);
+
+  // Handle add to cart and show success message
+  const handleAddToCart = (product: Categorydata) => {
+    addToCart(product); // Add the product to the cart
+    toast.success(`${product.product_name} has been added to your cart!`, { // Display success message
+      duration: 3000,
+    });
+  };
+
+  const handleAddToWishlist = (product: Categorydata) => {
+    setWishlist((prevWishlist) => {
+      if (!prevWishlist.some((item) => item._id === product._id)) {
+        const updatedWishlist = [...prevWishlist, product];
+        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist)); // Save to localStorage
+        toast.success(`${product.product_name} has been added to your wishlist!`, { duration: 3000 });
+        return updatedWishlist;
+      } else {
+        toast.error(`${product.product_name} is already in your wishlist!`, { duration: 3000 });
+        return prevWishlist;
+      }
+    });
+  };
+  
   return (
     <div>
-      {res.map((data) => {
+      {products.map((data) => {
         return (
           <div
             key={data._id}
@@ -53,14 +90,28 @@ export default async function Category_page({
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold">
                 {data.product_name}
               </h2>
+
               <p className="text-sm sm:text-base lg:text-lg font-light opacity-80">
                 {data.description}
               </p>
               <span className="text-xl sm:text-2xl lg:text-3xl font-medium">
                 ₹{data.price}
               </span>
-              <button className="h-12 sm:h-14 w-40 sm:w-48 bg-black text-white text-sm sm:text-lg font-medium rounded-lg hover:bg-gray-800">
+
+              {/* Add to Cart Button */}
+              <button
+                onClick={() => handleAddToCart(data)} // Use the function here
+                className="h-12 sm:h-14 w-40 sm:w-48 bg-black text-white text-sm sm:text-lg font-medium rounded-lg hover:bg-gray-800"
+              >
                 {data.addcart_button}
+              </button>
+
+              {/* Wishlist Button */}
+              <button
+                onClick={() => handleAddToWishlist(data)} // Add to wishlist
+                className="h-12 sm:h-14 w-40 sm:w-48 bg-gray-200 text-black text-sm sm:text-lg font-medium rounded-lg hover:bg-gray-400 mt-4"
+              >
+                Add to Wishlist
               </button>
             </div>
           </div>

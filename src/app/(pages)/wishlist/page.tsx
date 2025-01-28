@@ -1,193 +1,91 @@
-// import { useState } from "react";
-
-// export default function Wishlist() {
-//     const [wishlist, setWishlist] = useState([
-//       {
-//         id: 1,
-//         name: "Nike Air Max 270",
-//         image: "/air-max-270.jpg",
-//         price: "$150",
-//       },
-//       {
-//         id: 2,
-//         name: "Nike React Infinity Run",
-//         image: "/react-infinity-run.jpg",
-//         price: "$160",
-//       },
-//       {
-//         id: 3,
-//         name: "Nike Dunk Low",
-//         image: "/dunk-low.jpg",
-//         price: "$120",
-//       },
-//     ]);
-  
-//     const removeItem = (id:any) => {
-//       setWishlist(wishlist.filter((item) => item.id !== id));
-//     };
-  
-//     return (
-//       <div className="container">
-//         <h1>Nike Wishlist</h1>
-//         <div className="wishlist-grid">
-//           {wishlist.map((item) => (
-//             <div key={item.id} className="wishlist-item">
-//               <img src={item.image} alt={item.name} />
-//               <h2>{item.name}</h2>
-//               <p>{item.price}</p>
-//               <button onClick={() => removeItem(item.id)}>Remove</button>
-//             </div>
-//           ))}
-//         </div>
-  
-//         <style jsx>{`
-//           .container {
-//             padding: 20px;
-//             max-width: 1200px;
-//             margin: auto;
-//           }
-//           h1 {
-//             text-align: center;
-//             margin-bottom: 20px;
-//           }
-//           .wishlist-grid {
-//             display: grid;
-//             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-//             gap: 20px;
-//           }
-//           .wishlist-item {
-//             border: 1px solid #ddd;
-//             border-radius: 10px;
-//             padding: 20px;
-//             text-align: center;
-//             background: #f9f9f9;
-//           }
-//           .wishlist-item img {
-//             max-width: 100%;
-//             border-radius: 10px;
-//           }
-//           button {
-//             background: #ff4d4d;
-//             color: white;
-//             border: none;
-//             padding: 10px 15px;
-//             border-radius: 5px;
-//             cursor: pointer;
-//           }
-//           button:hover {
-//             background: #ff1a1a;
-//           }
-//         `}</style>
-//       </div>
-//     );
-//   }
-  
-  
-"use client"
+'use client';
+import { useCart } from "@/context/cartContext";
+import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
-export default function Wishlist() {
-  const [wishlist, setWishlist] = useState([
-    {
-      id: 1,
-      name: "Nike Air Max 270",
-      image: "/image23.png",
-      price: "$150",
-    },
-    {
-      id: 2,
-      name: "Nike React Infinity Run",
-      image: "/image24.png",
-      price: "$160",
-    },
-    {
-      id: 3,
-      name: "Nike Dunk Low",
-      image: "/images22.png",
-      price: "$120",
-    },
-  ]);
+interface Categorydata {
+  _createdAt: string;
+  _updatedAt: string;
+  name: string;
+  _id: string;
+  category: string;
+  image: string;
+  addcart_button: string;
+  price: number;
+  _rev: string;
+  _type: string;
+  description: string;
+  product_name: string; // Make sure to use product_name consistently
+}
 
-  interface WishlistItem {
-    id: number;
-    name: string;
-    image: string;
-    price: string;
-  }
+const WishlistPage = () => {
+  const [wishlist, setWishlist] = useState<Categorydata[]>([]); // Wishlist state
+  const { addToCart } = useCart();
 
-  const removeItem = (id: number) => {
-    setWishlist((prev: WishlistItem[]) => prev.filter((item: WishlistItem) => item.id !== id));
+  // Load wishlist from localStorage when the page loads
+  useEffect(() => {
+    const savedWishlist = localStorage.getItem("wishlist");
+    if (savedWishlist) {
+      const wishlistData = JSON.parse(savedWishlist);
+      console.log("Wishlist data: ", wishlistData); // Debugging log to check data
+      setWishlist(wishlistData);
+    }
+  }, []);
+
+  // Handle add to cart and show success message
+  const handleAddToCart = (product: Categorydata) => {
+    addToCart(product);
+    toast.success(`${product.product_name} has been added to your cart!`, { duration: 3000 });
+  };
+
+  // Optional: Remove from Wishlist (for better UX)
+  const handleRemoveFromWishlist = (productId: string) => {
+    const updatedWishlist = wishlist.filter((item) => item._id !== productId);
+    setWishlist(updatedWishlist);
+    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+    toast.success("Product removed from wishlist", { duration: 3000 });
   };
 
   return (
-    <div className="container">
-      <h1>Nike Wishlist</h1>
-      <div className="wishlist-grid">
-        {wishlist.map((item) => (
-          <div key={item.id} className="wishlist-item">
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={300}
-              height={300}
-              objectFit="cover"
-            />
-            <h2>{item.name}</h2>
-            <p>{item.price}</p>
-            <button onClick={() => removeItem(item.id)}>Remove</button>
-          </div>
-        ))}
-        {wishlist.length === 0 && <p>Your wishlist is empty!</p>}
-      </div>
+    <div>
+      <h1 className="text-3xl font-bold text-center mt-12">Your Wishlist</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-4 mt-8">
+        {wishlist.length > 0 ? (
+          wishlist.map((product) => (
+            <div key={product._id} className="flex flex-col items-center">
+              <Image
+                src={urlFor(product.image).url()}
+                alt={product.product_name || "Product"} // Fallback for missing name
+                className="w-60 h-60 object-cover"
+              />
+              <h2>{product.product_name || 'No Name Available'}</h2> {/* Fallback if product name is missing */}
+              <span className="text-lg mt-2">₹{product.price}</span>
 
-      <style jsx>{`
-        .container {
-          padding: 20px;
-          max-width: 1200px;
-          margin: auto;
-        }
-        h1 {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-        .wishlist-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
-        }
-        .wishlist-item {
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          padding: 20px;
-          text-align: center;
-          background: #f9f9f9;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        button {
-          background: #ff4d4d;
-          color: white;
-          border: none;
-          padding: 10px 15px;
-          border-radius: 5px;
-          cursor: pointer;
-          margin-top: 10px;
-        }
-        button:hover {
-          background: #ff1a1a;
-        }
-        @media (max-width: 768px) {
-          h1 {
-            font-size: 1.5rem;
-          }
-          .wishlist-item {
-            padding: 15px;
-          }
-          button {
-            padding: 8px 12px;
-          }
-        }
-      `}</style>
+              {/* Add to Cart Button */}
+              <button
+                onClick={() => handleAddToCart(product)}
+                className="mt-4 bg-black text-white px-6 py-3 text-sm font-medium rounded-lg"
+              >
+                Add to Cart
+              </button>
+
+              {/* Remove from Wishlist Button */}
+              <button
+                onClick={() => handleRemoveFromWishlist(product._id)}
+                className="mt-4 bg-red-500 text-white px-6 py-3 text-sm font-medium rounded-lg"
+              >
+                Remove
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="text-center mt-4 text-lg">Your wishlist is empty.</p>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default WishlistPage;

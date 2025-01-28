@@ -13,14 +13,9 @@ export const Shoesdata = {
           hotspot: true, 
         },
       },
+   
       {
-        name: 'productheading',
-        type: 'string',
-        title: 'Product Heading',
-      },
-
-      {
-        name: 'productname',
+        name: 'product_name',
         type: 'string',
         title: 'Product Name',
       },

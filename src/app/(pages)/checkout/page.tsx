@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useCart } from "@/context/cartContext";
-
+import Image from "next/image";
+import { urlFor } from "@/sanity/lib/image";
 const CheckoutPage = () => {
   const { cart } = useCart();
   const [formData, setFormData] = useState({
@@ -154,11 +155,13 @@ const CheckoutPage = () => {
               {cart.map((item) => (
                 <div key={item.product._id} className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-16 h-16 object-cover rounded-md mr-4"
-                    />
+                     <Image
+                                      src={urlFor(item.product.image).url()}
+                                      alt={item.product.name}
+                                      width={50}
+                                      height={50}
+                                      className="rounded-lg border object-cover w-28"
+                                    />
                     <p className="text-gray-700 font-medium">{item.product.name}</p>
                   </div>
                   <p className="text-gray-700 font-medium">
@@ -200,11 +203,13 @@ const CheckoutPage = () => {
       {orderDetails.items.map((item) => (
         <div key={item.product._id} className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center">
-            <img
-              src={item.product.image}
-              alt={item.product.name}
-              className="w-16 h-16 object-cover rounded-md mr-4"
-            />
+             <Image
+                              src={urlFor(item.product.image).url()}
+                              alt={item.product.name}
+                              width={50}
+                              height={50}
+                              className="rounded-lg border object-cover w-28"
+                            />
             <p className="text-gray-700 font-medium">{item.product.name}</p>
           </div>
           <p className="text-gray-700 font-medium">₹ {item.product.price * item.quantity}</p>

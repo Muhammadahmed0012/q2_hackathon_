@@ -26,7 +26,7 @@ const CartPage = () => {
                   <div className="flex-shrink-0 w-full md:w-1/3">
                     <Image
                       src={urlFor(item.product.image).url()}
-                      alt={item.product.name}
+                      alt={item.product.name}  
                       width={200}
                       height={200}
                       className="rounded-lg border object-cover w-full"
@@ -36,7 +36,7 @@ const CartPage = () => {
                   {/* Product Info */}
                   <div className="ml-6 flex-1">
                     <h3 className="font-bold text-xl text-gray-800">
-                      {item.product.name}
+                      {item.product.name} {/* Ensure to use product_name */}
                     </h3>
                     {/* Description is not available */}
                     <p className="text-sm text-gray-500 mt-1">
@@ -106,9 +106,9 @@ const CartPage = () => {
                 </p>
               </div>
               <Link href={"/checkout"}>
-              <button className="w-full bg-black text-white font-medium py-4 rounded-lg mt-6 hover:bg-gray-800">
-                Checkout
-              </button>
+                <button className="w-full bg-black text-white font-medium py-4 rounded-lg mt-6 hover:bg-gray-800">
+                  Checkout
+                </button>
               </Link>
             </div>
           </div>
